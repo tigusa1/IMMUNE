@@ -22,7 +22,7 @@ function varargout = IMMUNE_Phase_fig(varargin)
 
 % Edit the above text to modify the response to help IMMUNE_Phase_fig
 
-% Last Modified by GUIDE v2.5 12-Apr-2018 20:17:51
+% Last Modified by GUIDE v2.5 23-Nov-2018 13:48:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -68,30 +68,34 @@ varargout{1} = handles.output;
 %----------------------------------------------------------------------------------------------
 % Custom functions
 %----------------------------------------------------------------------------------------------
-function slider_Update(handles)
-C0     = get(handles.C0,    'Value');
-Islope = get(handles.Imult, 'Value');
-ICmult = get(handles.ICmult,'Value');
-Smult  = get(handles.Smult, 'Value');
+% function slider_Update(handles)
+% C0     = get(handles.C0,    'Value');
+% Islope = get(handles.Ilim0, 'Value');
+% ICmult = get(handles.Clim0, 'Value');
+% Smult  = get(handles.Slim0, 'Value');
 
 % --- Executes on button press in reset_button.
 function reset_button_Callback(hObject, eventdata, handles)
 IMMUNE_Phase(handles)
+handles.reset_button.Value = false;
 
 function save_button_Callback(hObject, eventdata, handles)
 IMMUNE_Phase(handles)
+handles.save_button.Value = false;
 
 function delete_button_Callback(hObject, eventdata, handles)
 h  = handles.initialValues;
 hS = h.String;
 hS = hS(setdiff(1:size(hS,1),h.Value(1)),:);
 handles.initialValues.String = hS;
+handles.delete_button.Value = false;
 
 function clear_button_Callback(hObject, eventdata, handles)
 handles.reset_button.Value = true;
-handles.clear_button.Value = true;
 handles.initialValues.String = '';
 IMMUNE_Phase(handles)
+handles.reset_button.Value = false;
+handles.clear_button.Value = false;
 
 function initialValues_Callback(hObject, eventdata, handles)
 handles.initialValues.UserData = true;
@@ -102,30 +106,26 @@ handles.initialValues.UserData = false;
 
 function read_button_Callback(hObject, eventdata, handles)
 handles.initialValues.String = char(...
-    ' 1 0.00 0.00 0.21 0.00 1.84 0.91 1.00 ',... % no SSc C->0
-    ' 2 0.00 0.00 0.21 0.00 0.70 0.91 1.00 ',... %           equil
-    ' 3 0.00 0.00 0.21 0.00 0.40 0.91 1.00 ',... %           Inf
-    ' 4 0.00 0.00 0.21 1.18 0.60 0.39 1.00 ',... %    SSc C->0: decrease ICmult or Imult, C->Inf, SSc increase
-    ' 5 0.00 0.00 0.21 0.86 0.54 0.75 1.00 ' ... %    similar, but with C->equil
     );  
+handles.read_button.Value = false;
 
 function unusedBox_Callback(hObject, eventdata, handles)
 
 % --- Executes on slider movement.
 function C0_Callback    (hObject, eventdata, handles)
-slider_Update(handles)
+% slider_Update(handles)
 IMMUNE_Phase(handles)
 
-function Imult_Callback(hObject, eventdata, handles)
-slider_Update(handles)
+function Ilim0_Callback (hObject, eventdata, handles)
+% slider_Update(handles)
 IMMUNE_Phase(handles)
 
-function ICmult_Callback(hObject, eventdata, handles)
-slider_Update(handles)
+function Clim0_Callback (hObject, eventdata, handles)
+% slider_Update(handles)
 IMMUNE_Phase(handles)
 
-function Smult_Callback (hObject, eventdata, handles)
-slider_Update(handles)
+function Slim0_Callback (hObject, eventdata, handles)
+% slider_Update(handles)
 IMMUNE_Phase(handles)
 
 %----------------------------------------------------------------------------------------------
@@ -133,9 +133,9 @@ IMMUNE_Phase(handles)
 %----------------------------------------------------------------------------------------------
 % --- Executes during object creation, after setting all properties.
 function C0_CreateFcn     (hObject, eventdata, handles)
-function Imult_CreateFcn  (hObject, eventdata, handles)
+function Ilim0_CreateFcn  (hObject, eventdata, handles)
 function C0_txt_CreateFcn (hObject, eventdata, handles)
 function figure1_CreateFcn(hObject, eventdata, handles)
-function ICmult_CreateFcn (hObject, eventdata, handles)
-function Smult_CreateFcn  (hObject, eventdata, handles)
+function Clim0_CreateFcn  (hObject, eventdata, handles)
+function Slim0_CreateFcn  (hObject, eventdata, handles)
 function initialValues_CreateFcn(hObject, eventdata, handles)

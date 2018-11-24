@@ -21,10 +21,10 @@ end
 [ Slim0,Clim0,Ilim0,Sslope,Cslope,Islope,S0,C0,I0,doSave ] = setParam(nargin,handles);
 
 if nargin
-    set(handles.C0_txt,    'String',sprintf('C0: %.2f',     C0    ))
-    set(handles.Ilim0_txt, 'String',sprintf('Ilim0: %.2f',  Ilim0 ))
-    set(handles.Clim0_txt, 'String',sprintf('Clim0: %.2f',  Clim0))
-    set(handles.Slim0_txt, 'String',sprintf('Slim0: %.2f',  Slim0 ))
+    set(handles.C0_txt,     'String',sprintf('C0: %.2f',      C0    ))
+    set(handles.Islope_txt, 'String',sprintf('Islope: %.2f',  Islope))
+    set(handles.Cslope_txt, 'String',sprintf('Cslope: %.2f',  Cslope))
+    set(handles.Sslope_txt, 'String',sprintf('Sslope: %.2f',  Sslope))
 end
 
 if doSave, return, end
@@ -341,72 +341,62 @@ function [ Slim0,Clim0,Ilim0,Sslope,Cslope,Islope,S0,C0,I0,doSave ] = setParam( 
 global St Ct It t Ssaved Csaved Isaved tsaved Slast Clast Ilast
 global iRuns
 
-Krun     =  1;                      % 1(01), 2(00), 3(11), 4(11), 5(10)
-
-Irun     =  1;                      % index for vector of parameters describing 2D equilibria
-I0run    =  1;                      % index for initial value
-
-if Krun==1
-    [Irun,I0run] = deal(1,1);      % basic run
-elseif Krun==2
-    [Irun,I0run] = deal(2,1);
+if Nargin
+    h = handles.initialValues;
+    doSave  = get(handles.save_button, 'Value');
+    doReset = get(handles.reset_button,'Value');
+    doClear = get(handles.clear_button,'Value');      % Clear also sets Reset
+    doInitialValues = h.UserData;                     % user values in initialValues textbox
+else
+    doSave  = false; doReset = false; doClear = false; doInitialValues = false;
 end
 
-Slim0s = [ 0.8 0.8 0.8 0.8 0.01 ];  % set of values for Slim0 (see above) indexed by Irun
-Sslopes= [ 1.0 0.3 0.3 0.3 0.9  ];  %                   Sslope
+if isempty(iRuns),  doInitial = true; else, doInitial = false; end
 
-Ilim0s = [ 0.5 0.8 0.8 0.8 0.4 ];   % set of values for Ilim0 (see above) indexed by Irun
-Islopes= [ 1.0 0.7 0.3 0.2 0.3 ];   %                   Islope
+initial0 = 2;
+initialS = 2;                                         % 1-initialParam, 2-sliders, 3-textbox, 4-saved
+if ~isempty(tsaved), initial0 = 4; end
 
-Clim0s = [ 0.6 0.8 0.4 0.8 0.4 ];   % set of values for Clim0 (see above) indexed by Irun
-Cslopes= [ 1.0 0.4 0.4 0.3 0.8 ];   %                   Cslope
+if (doInitial || doClear || ~Nargin), initial0 = 1; initialS = 1; end
+if (doInitialValues),                 initial0 = 1; initialS = 3; end
+if (doReset),                         initial0 = 1;               end
 
-S0s    = [ 0.2 0.7 0.0 0.0  ];      % initial value for S indexed by I0run
-C0s    = [ 0.5 0.6 0.4 0.20 ];      %                   C
-I0s    = [ 0.1 0.3 0.0 0.0  ];      %                   I
+if (doInitial || doClear), iRuns = 0; end
 
-SICs   = [ Slim0s;Sslopes;Ilim0s;Islopes;Clim0s;Cslopes ];  % matrix of parameters
-SIC0s  = [ S0s;I0s;C0s ];                                   % matrix of initial conditions
+[ Slim0,Sslope,Ilim0,Islope,Clim0,Cslope,S0,I0,C0 ] = initialParam;
 
-SICc   = num2cell(SICs (:,Irun )');                            % make it into a cell
-[ Slim00,Sslope,Ilim00,Islope,Clim00,Cslope ] = deal(SICc{:}); % deal the parameters
-
-SIClast = num2cell(SIC0s(:,I0run)');                     % default initial values for new runs
+if doInitialValues                                   % user values in initialValues textbox
+    hValues = str2num(h.String(h.Value,:));
+    cValues = num2cell(hValues);
+    [ S0,I0,C0 ] = cValues{2:4};        % get saved slopes
+    [ Slim0,Ilim0,Clim0 ] = cValues{5:7};            % get saved limits
+end
+if initial0==2
+    C0 = get(handles.C0, 'Value');
+elseif initial0==4
+    C0 = Csaved(end); I0 = Isaved(end); S0 = Ssaved(end);
+end
+if initialS==2
+    Cslope      = get(handles.Cslope, 'Value');
+    Sslope      = get(handles.Sslope, 'Value');
+    Islope      = get(handles.Islope, 'Value');
+elseif Nargin
+    set(handles.Cslope,'Value',Cslope);
+    set(handles.Sslope,'Value',Sslope);
+    set(handles.Islope,'Value',Islope);
+end
 %----------------------------------------------------------------------------------------------
 % Handle values
 %----------------------------------------------------------------------------------------------
-if Nargin
-    h = handles.initialValues;
-    doSave     = get(handles.save_button, 'Value');
-    doReset    = get(handles.reset_button,'Value');
-    doClear    = get(handles.clear_button,'Value');      % CLear also sets Reset
-    if isempty(iRuns) || doClear
-        iRuns = 0;
-    else
-        SIClast = {St(end),It(end),Ct(end)};             % save the end point
-    end
-    if h.UserData                                        % user values in initialValues textbox
-        hValues = str2num(h.String(h.Value,:));
-        SIClast = num2cell(hValues(2:4));
-        cValues = num2cell(hValues);
-        [ Slim0,Ilim0,Clim0 ] = cValues{5:7};
-        set(handles.Clim0,'Value',Clim0)
-        set(handles.Slim0,'Value',Slim0)
-        set(handles.Ilim0,'Value',Ilim0)
-    else
-        C0         = get(handles.C0,    'Value');
-        Clim0      = get(handles.Clim0, 'Value');
-        Slim0      = get(handles.Slim0, 'Value');
-        Ilim0      = get(handles.Ilim0, 'Value');
-    end
-else
-    C0       = SIC0s(3,I0run);
-    doSave   = false;
-    doReset  = true;
-    Clim0     = Clim00; Slim0 = Slim00; Ilim0 = Ilim00;
-end
-
-% Reset: use ICmult0, Smult0, Imult0, SIC0
+% Initial run, Clear, ~Nargin: initialParam          for 0,             '
+% Initial parameters:          textbox               for 0,             '
+% Other:                       initialParam or saved for 0, sliders for '
+% Reset:                       initialParam          for 0, sliders for ', clear saved arrays [return]
+% Save:                        save into saved arrays [return]
+%----------------------------------------------------------------------------------------------
+% Delete (local, deletes one line)
+% Read   (local, populate textbox)
+%----------------------------------------------------------------------------------------------
 if doSave
     iRuns  = iRuns + 1;
     params = [Slast Ilast Clast Slim0 Ilim0 Clim0];
@@ -421,26 +411,43 @@ if doSave
     end
 
     tsaved = t; Ssaved = St; Csaved = Ct; Isaved = It;
-    SIClast = {St(end),It(end),Ct(end)};                    % save the end point
-%   return
-elseif doReset
+elseif doReset || doInitialValues
     tsaved = []; Ssaved = []; Csaved = []; Isaved = [];
-    Clim0     = Clim00; Slim0 = Slim00; Ilim0 = Ilim00;
-    if Nargin
-        handles.Clim0.Value = Clim0; handles.Slim0.Value = Slim0; handles.Ilim0.Value = Ilim0; 
-    end
+    handles.C0.Value = C0;
 end
 
-[ S0,I0 ] = deal(SIClast{1:2});                           % deal the initial conditions
 
-if ~isempty(tsaved)                                       % if Save, use last value
-    C0 = deal(SIClast{3});
-elseif Nargin                                             % else if handles, use fig
-    C0 = get(handles.C0,'Value');
+function [ Slim00,Sslope,Ilim00,Islope,Clim00,Cslope,S0,I0,C0 ] = initialParam
+%----------------------------------------------------------------------------------------------
+% Initial values for the parameters
+%----------------------------------------------------------------------------------------------
+Krun     =  1;                      % 1(01), 2(00), 3(11), 4(11), 5(10)
+
+Irun     =  1;                      % index for vector of parameters describing 2D equilibria
+I0run    =  1;                      % index for initial value
+
+if Krun==1
+    [Irun,I0run] = deal(1,1);      % basic run
+elseif Krun==2
+    [Irun,I0run] = deal(2,1);
 end
 
-%----------------------------------------------------------------------------------------------
-% .33 .71 .77  S .
-%         .59  . .
-%     .67      S C
-%----------------------------------------------------------------------------------------------
+Slim0s = [ 0.8 0.8 ];  % set of values for Slim0 (see above) indexed by Irun
+Sslopes= [ 0.5 0.5 ];  %                   Sslope
+
+Ilim0s = [ 0.5 0.5 ];   % set of values for Ilim0 (see above) indexed by Irun
+Islopes= [ 0.5 0.5 ];   %                   Islope
+
+Clim0s = [ 0.6 0.6 ];   % set of values for Clim0 (see above) indexed by Irun
+Cslopes= [ 0.5 0.5 ];   %                   Cslope
+
+S0s    = [ 0.0 0.0 0.0 ];      % initial value for S indexed by I0run
+C0s    = [ 0.2 0.3 0.4 ];      %                   C
+I0s    = [ 0.0 0.0 0.0 ];      %                   I
+
+SICs   = [ Slim0s;Sslopes;Ilim0s;Islopes;Clim0s;Cslopes ];     % matrix of parameters
+SICc   = num2cell(SICs (:,Irun )');                            % make it into a cell
+
+[ Slim00,Sslope,Ilim00,Islope,Clim00,Cslope ] = deal(SICc{:}); % deal the parameters
+
+S0 = S0s(I0run); I0 = I0s(I0run); C0 = C0s(I0run);

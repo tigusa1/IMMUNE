@@ -22,7 +22,7 @@ function varargout = IMMUNE_Phase_fig(varargin)
 
 % Edit the above text to modify the response to help IMMUNE_Phase_fig
 
-% Last Modified by GUIDE v2.5 23-Nov-2018 13:48:09
+% Last Modified by GUIDE v2.5 23-Nov-2018 17:14:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,9 +70,9 @@ varargout{1} = handles.output;
 %----------------------------------------------------------------------------------------------
 % function slider_Update(handles)
 % C0     = get(handles.C0,    'Value');
-% Islope = get(handles.Ilim0, 'Value');
-% ICmult = get(handles.Clim0, 'Value');
-% Smult  = get(handles.Slim0, 'Value');
+% Islope = get(handles.Islope, 'Value');
+% ICmult = get(handles.Cslope, 'Value');
+% Smult  = get(handles.Sslope, 'Value');
 
 % --- Executes on button press in reset_button.
 function reset_button_Callback(hObject, eventdata, handles)
@@ -86,13 +86,13 @@ handles.save_button.Value = false;
 function delete_button_Callback(hObject, eventdata, handles)
 h  = handles.initialValues;
 hS = h.String;
-hS = hS(setdiff(1:size(hS,1),h.Value(1)),:);
+hS = hS(setdiff(1:size(hS,1),h.Value(1)),:); % delete one line
 handles.initialValues.String = hS;
 handles.delete_button.Value = false;
 
 function clear_button_Callback(hObject, eventdata, handles)
-handles.reset_button.Value = true;
-handles.initialValues.String = '';
+handles.reset_button.Value = true; % reset and
+handles.initialValues.String = ''; % clear textbox
 IMMUNE_Phase(handles)
 handles.reset_button.Value = false;
 handles.clear_button.Value = false;
@@ -116,15 +116,15 @@ function C0_Callback    (hObject, eventdata, handles)
 % slider_Update(handles)
 IMMUNE_Phase(handles)
 
-function Ilim0_Callback (hObject, eventdata, handles)
+function Islope_Callback (hObject, eventdata, handles)
 % slider_Update(handles)
 IMMUNE_Phase(handles)
 
-function Clim0_Callback (hObject, eventdata, handles)
+function Cslope_Callback (hObject, eventdata, handles)
 % slider_Update(handles)
 IMMUNE_Phase(handles)
 
-function Slim0_Callback (hObject, eventdata, handles)
+function Sslope_Callback (hObject, eventdata, handles)
 % slider_Update(handles)
 IMMUNE_Phase(handles)
 
@@ -133,9 +133,9 @@ IMMUNE_Phase(handles)
 %----------------------------------------------------------------------------------------------
 % --- Executes during object creation, after setting all properties.
 function C0_CreateFcn     (hObject, eventdata, handles)
-function Ilim0_CreateFcn  (hObject, eventdata, handles)
+function Islope_CreateFcn  (hObject, eventdata, handles)
 function C0_txt_CreateFcn (hObject, eventdata, handles)
 function figure1_CreateFcn(hObject, eventdata, handles)
-function Clim0_CreateFcn  (hObject, eventdata, handles)
-function Slim0_CreateFcn  (hObject, eventdata, handles)
+function Cslope_CreateFcn  (hObject, eventdata, handles)
+function Sslope_CreateFcn  (hObject, eventdata, handles)
 function initialValues_CreateFcn(hObject, eventdata, handles)
